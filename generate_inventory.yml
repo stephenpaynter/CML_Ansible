@@ -26,7 +26,6 @@
       - { name: S8, group: switches, sub_groups: [all_switches, ios, layer2, site_b] }
       - { name: S9, group: switches, sub_groups: [all_switches, ios, mgt, site_a] }
       - { name: S10, group: switches, sub_groups: [all_switches, ios, mgt, site_b] }
-    
     path: ./cml_inventory
     _routers: ""
     _switches: ""
@@ -69,9 +68,7 @@
       - S7
       - S9
 
-
   tasks:
-
 
     - name: "1:0: Allocate Device Names to Reserved IP Range"
       set_fact:
