@@ -6,3 +6,5 @@ Cisco Modeling Labs is an on-premise network simulation tool that runs on workst
 ### Generate Inventory
 
 CML personal allows the user to create and model a lab environment containing 20 nodes. I want to be able to stand these devices up quickly from an IP range covering only the 20 addresses needed for management. An inventory files should be created with the devices assigned to the correct ansible groups and variables assigned.
+
+The playbook allows the creation of devices from the specified pool of addresses, if 20 devices is exceeded the excess devices are ignored and the user warned. The play allows the user to feed in device names to be allocated addressing. A jinja2 template renders the inventory file.
