@@ -1,0 +1,241 @@
+---
+- name: Generate An Inventory For CML
+  connection: local
+  hosts: localhost
+  gather_facts: no
+  
+  vars:  
+    device_data:
+      - { name: R1, group: routers, sub_groups: [all_routers, nxos, core, site_a] }
+      - { name: R2, group: routers, sub_groups: [all_routers, nxos, core, site_a] }      
+      - { name: R3, group: routers, sub_groups: [all_routers, nxos, core, site_b] }
+      - { name: R4, group: routers, sub_groups: [all_routers, nxos, core, site_b] }
+      - { name: R5, group: routers, sub_groups: [all_routers, nxos, edge, site_a] }
+      - { name: R6, group: routers, sub_groups: [all_routers, nxos, edge, site_a] }
+      - { name: R7, group: routers, sub_groups: [all_routers, nxos, edge, site_b] }
+      - { name: R8, group: routers, sub_groups: [all_routers, nxos, edge, site_b] }
+      - { name: R9, group: routers, sub_groups: [all_routers, nxos, mgt, site_a] }
+      - { name: R10, group: routers, sub_groups: [all_routers, nxos, mgt, site_b] }
+      - { name: S1, group: switches, sub_groups: [all_switches, ios, layer2, site_a] }
+      - { name: S2, group: switches, sub_groups: [all_switches, ios, layer2, site_a] }      
+      - { name: S3, group: switches, sub_groups: [all_switches, ios, layer2, site_b] }
+      - { name: S4, group: switches, sub_groups: [all_switches, ios, layer2, site_b] }
+      - { name: S5, group: switches, sub_groups: [all_switches, ios, layer2, site_a] }
+      - { name: S6, group: switches, sub_groups: [all_switches, ios, layer2, site_a] }
+      - { name: S7, group: switches, sub_groups: [all_switches, ios, layer2, site_b] }
+      - { name: S8, group: switches, sub_groups: [all_switches, ios, layer2, site_b] }
+      - { name: S9, group: switches, sub_groups: [all_switches, ios, mgt, site_a] }
+      - { name: S10, group: switches, sub_groups: [all_switches, ios, mgt, site_b] }
+    
+    path: ./cml_inventory
+    _routers: ""
+    _switches: ""
+    _all_routers: ""
+    _all_switches: ""
+    _nxos: ""
+    _ios: ""
+    _core: ""
+    _edge: ""
+    _mgt: ""
+    _layer2: ""
+    _site_a: ""
+    _site_b: ""
+    ips: 
+      - 10.1.1.1
+      - 10.1.1.2
+      - 10.1.1.3
+      - 10.1.1.4 
+      - 10.1.1.5
+      - 10.1.1.6
+      - 10.1.1.7
+      - 10.1.1.8
+      - 10.1.1.9
+      - 10.1.1.10
+      - 10.1.1.11
+      - 10.1.1.12
+      - 10.1.1.13
+      - 10.1.1.14
+      - 10.1.1.15
+      - 10.1.1.16
+      - 10.1.1.17
+      - 10.1.1.18
+      - 10.1.1.19
+      - 10.1.1.20
+    devices:
+      - R1
+      - R2
+      - S1
+      - S3
+      - S7
+      - S9
+
+
+  tasks:
+
+
+    - name: "1:0: Allocate Device Names to Reserved IP Range"
+      set_fact:
+        _joined: "{{ devices|zip(ips)|map('join', ' ansible_host=')|list }}"
+
+    - name: "2:0: Instantiate List Containing Router Devices"
+      set_fact:
+        _routers_hosts: "{{ _routers_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: item.group == 'routers'
+
+    - name: "2:1: Instantiate List Containing Router Devices From User Selected Devices"
+      set_fact:
+        _routers: "{{ _routers | default([]) | list + [ item] }}"
+      when: item in _routers_hosts and _routers_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "3:0: Instantiate List Containing Switches Devices"
+      set_fact:
+        _switches_hosts: "{{ _switches_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: item.group == 'switches'
+
+    - name: "3:1: Instantiate List Containing Switches Devices From User Selected Devices"
+      set_fact:
+        _switches: "{{ _switches | default([]) | list + [ item] }}"
+      when: item in _switches_hosts and _switches_hosts is defined
+      with_items: "{{ devices }}"
+   
+    - name: "4:0: Instantiate List From Sub Groups Containing all_routers"
+      set_fact:
+        _all_routers_hosts: "{{ _all_routers_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"all_routers" in item.sub_groups'
+
+    - name: "4:1: Instantiate List Containing all_routers From User Selected Devices"
+      set_fact:
+         _all_routers: "{{  _all_routers | default([]) | list + [ item] }}"
+      when: item in  _all_routers_hosts and _all_routers_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "5:0: Instantiate List From Sub Groups Containing all_switches"
+      set_fact:
+        _all_switches_hosts: "{{ _all_switches_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"all_switches" in item.sub_groups'
+
+    - name: "5:1: Instantiate List Containing all_switches From User Selected Devices"
+      set_fact:
+         _all_switches: "{{  _all_switches | default([]) | list + [ item] }}"
+      when: item in  _all_switches_hosts and _all_switches_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "6:0: Instantiate List From Sub Groups Containing nxos"
+      set_fact:
+        _nxos_hosts: "{{ _nxos_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"nxos" in item.sub_groups'
+
+    - name: "6:1: Instantiate List Containing nxos From User Selected Devices"
+      set_fact:
+         _nxos: "{{  _nxos | default([]) | list + [ item] }}"
+      when: item in  _nxos_hosts and _nxos_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "7:0: Instantiate List From Sub Groups Containing ios"
+      set_fact:
+        _ios_hosts: "{{ _ios_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"ios" in item.sub_groups'
+
+    - name: "7:1: Instantiate List Containing ios From User Selected Devices"
+      set_fact:
+         _ios: "{{  _ios | default([]) | list + [ item] }}"
+      when: item in  _ios_hosts and _ios_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "8:0: Instantiate List From Sub Groups Containing core"
+      set_fact:
+        _core_hosts: "{{ _core_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"core" in item.sub_groups'
+
+    - name: "8:1: Instantiate List Containing core From User Selected Devices"
+      set_fact:
+         _core: "{{  _core | default([]) | list + [ item] }}"
+      when: item in  _core_hosts and _core_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "9:0: Instantiate List From Sub Groups Containing edge"
+      set_fact:
+        _edge_hosts: "{{ _edge_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"edge" in item.sub_groups'
+
+    - name: "9:1: Instantiate List Containing edge From User Selected Devices"
+      set_fact:
+         _edge: "{{  _edge | default([]) | list + [ item] }}"
+      when: item in  _edge_hosts and _edge_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "10:0: Instantiate List From Sub Groups Containing mgt"
+      set_fact:
+        _mgt_hosts: "{{ _mgt_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"mgt" in item.sub_groups'
+
+    - name: "10:1: Instantiate List Containing mgt From User Selected Devices"
+      set_fact:
+         _mgt: "{{  _mgt | default([]) | list + [ item] }}"
+      when: item in  _mgt_hosts and _mgt_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "11:0: Instantiate List From Sub Groups Containing layer2"
+      set_fact:
+        _layer2_hosts: "{{ _layer2_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"layer2" in item.sub_groups'
+
+    - name: "11:1: Instantiate List Containing layer2 From User Selected Devices"
+      set_fact:
+         _layer2: "{{  _layer2 | default([]) | list + [ item] }}"
+      when: item in  _layer2_hosts and _layer2_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "12:0: Instantiate List From Sub Groups Containing site_a"
+      set_fact:
+        _site_a_hosts: "{{ _site_a_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"site_a" in item.sub_groups'
+
+    - name: "12:1: Instantiate List Containing site_a From User Selected Devices"
+      set_fact:
+         _site_a: "{{  _site_a | default([]) | list + [ item] }}"
+      when: item in  _site_a_hosts and _site_a_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "13:0: Instantiate List From Sub Groups Containing site_b"
+      set_fact:
+        _site_b_hosts: "{{ _site_b_hosts | default([]) + [ item.name ] }}"
+      loop: "{{ device_data }}"
+      when: '"site_b" in item.sub_groups'
+
+    - name: "13:1: Instantiate List Containing site_b From User Selected Devices"
+      set_fact:
+         _site_b: "{{  _site_b | default([]) | list + [ item] }}"
+      when: item in  _site_b_hosts and _site_b_hosts is defined
+      with_items: "{{ devices }}"
+
+    - name: "14:0: Touch Inventory File"
+      ansible.builtin.file:
+        path: "{{ path }}"
+        state: touch
+
+    - name: "15:0 Render With Jinja2 Template"
+      template:
+        src: cml_inventory.j2
+        dest: "{{ path }}"
+
+    - name: "16:0 Count Devies Used Within CML Entry Data"
+      set_fact:
+        _count: "{{ devices | length }}"
+
+    - name: "16:1 Report If Device/Licence Number Exceeded"
+      debug:
+        msg: "More than 20 devices added, only first 20 devices will be created due to licensing restrictions."
+      when: _count > '20'
