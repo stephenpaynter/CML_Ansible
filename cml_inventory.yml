@@ -1,0 +1,129 @@
+[all]
+{% for item in _joined %}
+{{ item.split(',') | last }}
+{% endfor %}
+
+
+{%- if _routers == "" -%}
+{% else %}
+
+[routers]
+{% endif %}
+{% for item in _routers %}
+{{ item }}
+{% endfor %}
+
+{%- if _routers == "" -%}
+{% else %}
+
+[routers:vars]
+ansible_network_os=nxos
+ansible_connection=network_cli
+{% endif %}
+
+{%- if _switches == "" -%}
+{% else %}
+
+[switches]
+{% endif %}
+{% for item in _switches %}
+{{ item }}
+{% endfor %}
+
+{%- if _switches == "" -%}
+{% else %}
+
+[switches:vars]
+ansible_network_os=ios
+ansible_connection=network_cli
+{% endif %}
+
+{%- if _all_routers == "" -%}
+{% else %}
+
+[all_routers]
+{% endif %}
+{% for item in _all_routers %}
+{{ item }}
+{% endfor %}
+
+{%- if _all_switches == "" -%}
+{% else %}
+
+[all_switches]
+{% endif %}
+{% for item in _all_switches %}
+{{ item }}
+{% endfor %}
+
+{%- if _nxos == "" -%}
+{% else %}
+
+[nxos]
+{% endif %}
+{% for item in _nxos %}
+{{ item }}
+{% endfor %}
+
+{%- if _ios == "" -%}
+{% else %}
+
+[ios]
+{% endif %}
+{% for item in _ios %}
+{{ item }}
+{% endfor %}
+
+{%- if _core == "" -%}
+{% else %}
+
+[core]
+{% endif %}
+{% for item in _core %}
+{{ item }}
+{% endfor %}
+
+{%- if _edge == "" -%}
+{% else %}
+
+[edge]
+{% endif %}
+{% for item in _edge %}
+{{ item }}
+{% endfor %}
+
+{%- if _mgt == "" -%}
+{% else %}
+
+[mgt]
+{% endif %}
+{% for item in _mgt %}
+{{ item }}
+{% endfor %}
+
+{%- if _layer2 == "" -%}
+{% else %}
+
+[layer2]
+{% endif %}
+{% for item in _layer2 %}
+{{ item }}
+{% endfor %}
+
+{%- if _site_a == "" -%}
+{% else %}
+
+[site_a]
+{% endif %}
+{% for item in _site_a %}
+{{ item }}
+{% endfor %}
+
+{%- if _site_b == "" -%}
+{% else %}
+
+[site_b]
+{% endif %}
+{% for item in _site_b %}
+{{ item }}
+{% endfor %}
